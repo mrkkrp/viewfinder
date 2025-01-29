@@ -1,0 +1,65 @@
+cabal-version:   2.4
+name:            viewfinder
+version:         0.0.1.0
+license:         BSD-3-Clause
+license-file:    LICENSE.md
+maintainer:      Mark Karpov <markkarpov92@gmail.com>
+author:          Mark Karpov <markkarpov92@gmail.com>
+tested-with:     ghc ==9.8.4 ghc ==9.10.1 ghc ==9.12.1
+homepage:        https://github.com/mrkkrp/viewfinder
+bug-reports:     https://github.com/mrkkrp/viewfinder/issues
+synopsis:        A utility for randomized selection of views
+description:     A utility for randomized selection of views.
+category:        Geography
+build-type:      Simple
+extra-doc-files:
+    CHANGELOG.md
+    README.md
+
+source-repository head
+    type:     git
+    location: https://github.com/mrkkrp/viewfinder.git
+
+flag dev
+    description: Turn on development settings.
+    default:     False
+    manual:      True
+
+library
+    exposed-modules:
+        Viewfinder.Gen
+        Viewfinder.MetricDelta
+
+    default-language: GHC2021
+    build-depends:
+        base >=4.17 && <5,
+        geodetics >=1,
+        splitmix >=0.1 && <0.2
+
+    if flag(dev)
+        ghc-options:
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
+            -Wunused-packages
+
+    else
+        ghc-options: -O2 -Wall
+
+executable viewfinder
+    main-is:          Main.hs
+    hs-source-dirs:   app
+    other-modules:    Paths_viewfinder
+    autogen-modules:  Paths_viewfinder
+    default-language: GHC2021
+    build-depends:
+        base >=4.17 && <5,
+        gitrev >=1.3 && <1.4,
+        optparse-applicative >=0.14 && <0.19,
+        viewfinder
+
+    if flag(dev)
+        ghc-options:
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
+            -Wunused-packages
+
+    else
+        ghc-options: -O2 -Wall
