@@ -27,7 +27,9 @@ flag dev
 
 library
     exposed-modules:
+        Viewfinder.Direction
         Viewfinder.Gen
+        Viewfinder.Gen.Direction
         Viewfinder.Gen.GridOffset
         Viewfinder.Geodetic
 

@@ -12,6 +12,7 @@ import Options.Applicative
 import Paths_viewfinder (version)
 import System.Random.SplitMix
 import Viewfinder.Gen qualified as Gen
+import Viewfinder.Gen.Direction qualified as Gen
 import Viewfinder.Gen.GridOffset qualified as Gen
 import Viewfinder.Geodetic (applyGridOffset)
 
@@ -21,20 +22,24 @@ main = do
   g <- case optSeed of
     Nothing -> initSMGen
     Just seed -> return (mkSMGen (fromIntegral seed))
-  let (gridOffsets, _) =
+  let (views, _) =
         Gen.run g $
           replicateM
             (fromIntegral optViewsToGenerate)
-            (Gen.sampleGridOffset (fromIntegral optRadius))
+            ( (,)
+                <$> Gen.sampleGridOffset (fromIntegral optRadius)
+                <*> Gen.sampleDirection
+            )
       m :: Int
       m =
         1 + floor (logBase 10.0 (fromIntegral optViewsToGenerate :: Double))
-  forM_ (zip [1 ..] gridOffsets) $ \(i :: Int, gridOffset) -> do
+  forM_ (zip [1 ..] views) $ \(i :: Int, (gridOffset, direction)) -> do
     when optPrintIndices $ do
       let i' = show i
           m' = m - length i'
       putStr (replicate m' ' ' ++ i' ++ ". ")
     print (applyGridOffset gridOffset optOrigin)
+    print direction
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
