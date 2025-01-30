@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "././"
+      component: "lib:viewfinder"
+
+    - path: "./app/Main.hs"
+      component: "viewfinder:exe:viewfinder"
