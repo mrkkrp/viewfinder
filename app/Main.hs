@@ -55,7 +55,10 @@ data Opts = Opts
 
 optsParserInfo :: ParserInfo Opts
 optsParserInfo =
-  info (helper <*> ver <*> optsParser) fullDesc
+  info (helper <*> ver <*> optsParser) . mconcat $
+    [ fullDesc,
+      progDesc "A utility for randomized selection of views"
+    ]
   where
     ver :: Parser (a -> a)
     ver =
