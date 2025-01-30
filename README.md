@@ -9,6 +9,6 @@ random angle of view in terms of the four cardinal directions.
 
 ## License
 
-Copyright © 2024–present Mark Karpov
+Copyright © 2025–present Mark Karpov
 
 Distributed under BSD 3 clause license.
