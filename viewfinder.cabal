@@ -29,9 +29,7 @@ library
     exposed-modules:
         Viewfinder.Direction
         Viewfinder.Gen
-        Viewfinder.Gen.Direction
-        Viewfinder.Gen.GridOffset
-        Viewfinder.Geodetic
+        Viewfinder.View
 
     default-language: GHC2021
     build-depends:

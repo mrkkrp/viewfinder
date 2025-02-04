@@ -2,3 +2,8 @@ packages: .
 tests: True
 benchmarks: True
 constraints: viewfinder +dev
+
+source-repository-package
+    type: git
+    location: https://github.com/PaulJohnson/geodetics.git
+    tag: d13627f8d486179bde34a263fe4c383ce078b2a6
