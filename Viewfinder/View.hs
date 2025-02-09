@@ -1,13 +1,14 @@
 module Viewfinder.View
   ( View (..),
     sample,
-    pretty,
+    render,
   )
 where
 
 import Geodetics.Geodetic
 import Geodetics.Grid
 import Geodetics.TransverseMercator
+import Viewfinder.CoordinateFormat (CoordinateFormat (..))
 import Viewfinder.Direction (Direction)
 import Viewfinder.Direction qualified as Direction
 import Viewfinder.Gen
@@ -44,7 +45,14 @@ applyGridOffset offset g =
   where
     transverseMercatorGrid = mkGridTM g mempty 1.0
 
--- | Pretty-print a 'View'.
-pretty :: View -> String
-pretty (View coordinate direction) =
-  showGeodeticNSEWDecimal coordinate ++ " | " ++ Direction.pretty direction
+-- | Render a 'View' in a human-friendly way.
+render :: CoordinateFormat -> View -> String
+render coordinateFormat (View coordinate direction) =
+  coordinatesRendered ++ " | " ++ Direction.render direction
+  where
+    coordinatesRendered =
+      case coordinateFormat of
+        DegreesMinutesSeconds -> showGeodeticLatLong coordinate
+        SignedDecimals -> showGeodeticSignedDecimal coordinate
+        NSEWDecimals -> showGeodeticNSEWDecimal coordinate
+        DDDMMSS -> showGeodeticDDDMMSS True coordinate

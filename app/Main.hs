@@ -11,6 +11,8 @@ import Numeric.Natural
 import Options.Applicative
 import Paths_viewfinder (version)
 import System.Random.SplitMix
+import Viewfinder.CoordinateFormat (CoordinateFormat (..))
+import Viewfinder.CoordinateFormat qualified as CoordinateFormat
 import Viewfinder.Gen qualified as Gen
 import Viewfinder.View qualified as View
 
@@ -33,7 +35,7 @@ main = do
       let i' = show i
           m' = m - length i'
       putStr (replicate m' ' ' ++ i' ++ ". ")
-    putStrLn (View.pretty view)
+    putStrLn (View.render optCoordinateFormat view)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
@@ -48,6 +50,8 @@ data Opts = Opts
     optRadius :: Natural,
     -- | Print indices of the generated views.
     optPrintIndices :: Bool,
+    -- | The format of geographic coordinates to use
+    optCoordinateFormat :: CoordinateFormat,
     -- | Location of the origin
     optOrigin :: Geodetic WGS84
   }
@@ -102,6 +106,14 @@ optsParser =
       [ long "indices",
         short 'i',
         help "Print indices of the generated views"
+      ]
+    <*> (option CoordinateFormat.parse . mconcat)
+      [ long "coordinate-format",
+        short 'f',
+        metavar "FORMAT",
+        value NSEWDecimals,
+        showDefaultWith CoordinateFormat.render,
+        help "The format of geographic coordinates to use: dms, sdecimals, udecimals, dddmmss"
       ]
     <*> (argument parseGeodetic . mconcat)
       [ metavar "ORIGIN",
