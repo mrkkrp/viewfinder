@@ -3,7 +3,7 @@
 
 module Main (main) where
 
-import Control.Monad (forM_, replicateM, when)
+import Control.Monad (forM_, when)
 import Data.Version (showVersion)
 import Development.GitRev
 import Geodetics.Geodetic
@@ -22,11 +22,16 @@ main = do
   g <- case optSeed of
     Nothing -> initSMGen
     Just seed -> return (mkSMGen (fromIntegral seed))
-  let (views, _) =
+  let (views', _) =
         Gen.run g $
-          replicateM
-            (fromIntegral optViewsToGenerate)
-            (View.sample (fromIntegral optRadius) optOrigin)
+          View.sampleN
+            optViewsToGenerate
+            (fromIntegral optRadius)
+            optOrigin
+      views =
+        if optOptimizeTrajectory
+          then View.optimizeTrajectory optOrigin views'
+          else views'
       m :: Int
       m =
         1 + floor (logBase 10.0 (fromIntegral optViewsToGenerate :: Double))
@@ -52,6 +57,9 @@ data Opts = Opts
     optPrintIndices :: Bool,
     -- | The format of geographic coordinates to use
     optCoordinateFormat :: CoordinateFormat,
+    -- | Whether to present views in the order that corresponds to the
+    -- optimal trajectory
+    optOptimizeTrajectory :: Bool,
     -- | Location of the origin
     optOrigin :: Geodetic WGS84
   }
@@ -114,6 +122,11 @@ optsParser =
         value NSEWDecimals,
         showDefaultWith CoordinateFormat.render,
         help "The format of geographic coordinates to use: dms, sdecimals, udecimals, dddmmss"
+      ]
+    <*> (switch . mconcat)
+      [ long "optimize-trajectory",
+        short 'o',
+        help "Whether to present views in the order that corresponds to the optimal trajectory"
       ]
     <*> (argument parseGeodetic . mconcat)
       [ metavar "ORIGIN",

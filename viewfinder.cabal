@@ -35,8 +35,10 @@ library
     default-language: GHC2021
     build-depends:
         base >=4.17 && <5,
+        containers >=0.5 && <0.8,
         geodetics >=1,
         optparse-applicative >=0.14 && <0.19,
+        search-algorithms >=0.3.2 && <0.4,
         splitmix >=0.1 && <0.2,
         transformers >=0.4 && <0.7
 
