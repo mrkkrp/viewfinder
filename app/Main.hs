@@ -105,7 +105,7 @@ optsParser =
       ]
     <*> (argument parseGeodetic . mconcat)
       [ metavar "ORIGIN",
-        help "Location of the origin"
+        help "Location of the origin (latitude and longitude as a single space-separated string)"
       ]
 
 -- | Parse a 'Geodetic' value.
