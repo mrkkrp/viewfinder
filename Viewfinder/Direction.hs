@@ -4,7 +4,7 @@
 module Viewfinder.Direction
   ( Direction (..),
     sample,
-    pretty,
+    render,
   )
 where
 
@@ -27,9 +27,9 @@ data Direction
 sample :: Gen Direction
 sample = oneof (NonEmpty.fromList [minBound .. maxBound])
 
--- | Pretty-print a 'Direction'.
-pretty :: Direction -> String
-pretty = \case
+-- | Convert 'Direction' into a human-friendly 'String' representation.
+render :: Direction -> String
+render = \case
   North -> "N"
   NorthEast -> "NE"
   East -> "E"

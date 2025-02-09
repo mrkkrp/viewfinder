@@ -27,6 +27,7 @@ flag dev
 
 library
     exposed-modules:
+        Viewfinder.CoordinateFormat
         Viewfinder.Direction
         Viewfinder.Gen
         Viewfinder.View
@@ -35,6 +36,7 @@ library
     build-depends:
         base >=4.17 && <5,
         geodetics >=1,
+        optparse-applicative >=0.14 && <0.19,
         splitmix >=0.1 && <0.2,
         transformers >=0.4 && <0.7
 
