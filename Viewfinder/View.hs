@@ -1,16 +1,24 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Viewfinder.View
   ( View (..),
     sampleN,
     sample,
     render,
+    renderCsv,
     optimizeTrajectory,
   )
 where
 
 import Algorithm.Search (dijkstraAssoc)
 import Control.Monad (replicateM)
+import Data.ByteString qualified as Strict
+import Data.ByteString.Lazy qualified as Lazy
+import Data.Csv (ToNamedRecord, (.=))
+import Data.Csv qualified as Csv
 import Data.Function (on)
 import Data.Set qualified as Set
+import Data.Vector qualified as Vector
 import Geodetics.Geodetic
 import Geodetics.Grid
 import Geodetics.TransverseMercator
@@ -33,6 +41,13 @@ instance Ord View where
 -- | Isomorphism to something that compares.
 makeComparable :: View -> (Double, Double, Double, Direction)
 makeComparable (View g d) = (latitude g, longitude g, geoAlt g, d)
+
+instance ToNamedRecord View where
+  toNamedRecord (View coordinate direction) =
+    Csv.namedRecord
+      [ coordinateField .= renderCoordinate NSEWDecimals coordinate,
+        directionField .= Direction.render direction
+      ]
 
 -- | Generate a number of random 'View's whose location is within the radius
 -- from the origin.
@@ -80,14 +95,23 @@ applyGridOffset offset g =
 -- | Render a 'View' in a human-friendly way.
 render :: CoordinateFormat -> View -> String
 render coordinateFormat (View coordinate direction) =
-  coordinatesRendered ++ " | " ++ Direction.render direction
+  renderCoordinate coordinateFormat coordinate ++ " | " ++ Direction.render direction
+
+-- | Render a 'Geodetic' as a latitude/longitude coordinate pair in the
+-- specified 'CoordinateFormat'.
+renderCoordinate :: CoordinateFormat -> Geodetic WGS84 -> String
+renderCoordinate coordinateFormat coordinate =
+  case coordinateFormat of
+    DegreesMinutesSeconds -> showGeodeticLatLong coordinate
+    SignedDecimals -> showGeodeticSignedDecimal coordinate
+    NSEWDecimals -> showGeodeticNSEWDecimal coordinate
+    DDDMMSS -> showGeodeticDDDMMSS True coordinate
+
+-- | Render a collection of 'View's as a CSV document.
+renderCsv :: [View] -> Lazy.ByteString
+renderCsv = Csv.encodeByName header
   where
-    coordinatesRendered =
-      case coordinateFormat of
-        DegreesMinutesSeconds -> showGeodeticLatLong coordinate
-        SignedDecimals -> showGeodeticSignedDecimal coordinate
-        NSEWDecimals -> showGeodeticNSEWDecimal coordinate
-        DDDMMSS -> showGeodeticDDDMMSS True coordinate
+    header = Vector.fromList [coordinateField, directionField]
 
 -- | Order given 'View's so that they form an optimal trajectory from and
 -- back to origin. This is somewhat naïve, since we assume that any two
@@ -139,3 +163,7 @@ geodeticDistance x y =
   case groundDistance x y of
     Nothing -> error "Viewfinder.View.distance: algorithm failed to converge"
     Just (d, _, _) -> d
+
+coordinateField, directionField :: Strict.ByteString
+coordinateField = "coordinate"
+directionField = "direction"

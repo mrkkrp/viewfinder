@@ -4,6 +4,7 @@
 module Main (main) where
 
 import Control.Monad (forM_, when)
+import Data.ByteString.Lazy qualified as Lazy
 import Data.Version (showVersion)
 import Development.GitRev
 import Geodetics.Geodetic
@@ -35,12 +36,14 @@ main = do
       m :: Int
       m =
         1 + floor (logBase 10.0 (fromIntegral optViewsToGenerate :: Double))
-  forM_ (zip [1 ..] views) $ \(i :: Int, view) -> do
-    when optPrintIndices $ do
-      let i' = show i
-          m' = m - length i'
-      putStr (replicate m' ' ' ++ i' ++ ". ")
-    putStrLn (View.render optCoordinateFormat view)
+  if optOutputCsv
+    then Lazy.putStr (View.renderCsv views)
+    else forM_ (zip [1 ..] views) $ \(i :: Int, view) -> do
+      when optPrintIndices $ do
+        let i' = show i
+            m' = m - length i'
+        putStr (replicate m' ' ' ++ i' ++ ". ")
+      putStrLn (View.render optCoordinateFormat view)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
@@ -60,6 +63,8 @@ data Opts = Opts
     -- | Whether to present views in the order that corresponds to the
     -- optimal trajectory
     optOptimizeTrajectory :: Bool,
+    -- | Output views in the CSV format
+    optOutputCsv :: Bool,
     -- | Location of the origin
     optOrigin :: Geodetic WGS84
   }
@@ -127,6 +132,10 @@ optsParser =
       [ long "optimize-trajectory",
         short 'o',
         help "Whether to present views in the order that corresponds to the optimal trajectory"
+      ]
+    <*> (switch . mconcat)
+      [ long "csv",
+        help "Output views in the CSV format"
       ]
     <*> (argument parseGeodetic . mconcat)
       [ metavar "ORIGIN",
