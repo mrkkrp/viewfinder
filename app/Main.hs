@@ -111,7 +111,7 @@ optsParser =
       [ long "radius",
         short 'r',
         metavar "R",
-        value 3000,
+        value 2000,
         showDefault,
         help "Maximal distance from the origin in meters"
       ]
