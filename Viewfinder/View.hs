@@ -42,12 +42,19 @@ instance Ord View where
 makeComparable :: View -> (Double, Double, Double, Direction)
 makeComparable (View g d) = (latitude g, longitude g, geoAlt g, d)
 
-instance ToNamedRecord View where
-  toNamedRecord (View coordinate direction) =
-    Csv.namedRecord
-      [ coordinateField .= renderCoordinate NSEWDecimals coordinate,
-        directionField .= Direction.render direction
-      ]
+-- | A 'View' equipped with 'CoordinateFormat'.
+data ViewWithCoordinateFormat = ViewWithCoordinateFormat CoordinateFormat View
+
+instance ToNamedRecord ViewWithCoordinateFormat where
+  toNamedRecord
+    ( ViewWithCoordinateFormat
+        coordinateFormat
+        (View coordinate direction)
+      ) =
+      Csv.namedRecord
+        [ coordinateField .= renderCoordinate coordinateFormat coordinate,
+          directionField .= Direction.render direction
+        ]
 
 -- | Generate a number of random 'View's whose location is within the radius
 -- from the origin.
@@ -108,8 +115,9 @@ renderCoordinate coordinateFormat coordinate =
     DDDMMSS -> showGeodeticDDDMMSS True coordinate
 
 -- | Render a collection of 'View's as a CSV document.
-renderCsv :: [View] -> Lazy.ByteString
-renderCsv = Csv.encodeByName header
+renderCsv :: CoordinateFormat -> [View] -> Lazy.ByteString
+renderCsv coordinateFormat =
+  Csv.encodeByName header . fmap (ViewWithCoordinateFormat coordinateFormat)
   where
     header = Vector.fromList [coordinateField, directionField]
 

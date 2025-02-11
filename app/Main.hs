@@ -37,7 +37,7 @@ main = do
       m =
         1 + floor (logBase 10.0 (fromIntegral optViewsToGenerate :: Double))
   if optOutputCsv
-    then Lazy.putStr (View.renderCsv views)
+    then Lazy.putStr (View.renderCsv optCoordinateFormat views)
     else forM_ (zip [1 ..] views) $ \(i :: Int, view) -> do
       when optPrintIndices $ do
         let i' = show i
